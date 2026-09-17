@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -90,6 +91,7 @@
             <a href="blog.php">Блог</a>
             <a href="contacts.php">Контакты</a>
             <a href="sitemap.php">Карта сайта</a>
+            <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
         </nav>
         <button class="theme-toggle" onclick="toggleTheme()">👁️ Версия для слабовидящих</button>
         <div class="header-contacts">📞 +7 (999) 123-45-67</div>
@@ -139,7 +141,18 @@
             <div class="contact-form">
                 <h3>Оставьте заявку</h3>
                 <p style="text-align:center; margin-bottom:20px; color:#666;">Мы свяжемся с вами в ближайшее время</p>
-                <form action="#" method="POST">
+                            <?php if (isset($_GET['success'])): ?>
+    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+        ✅ Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+        ❌ Ошибка: проверьте, пожалуйста, что все обязательные поля заполнены.
+    </div>
+<?php endif; ?>
+                <form action="save_application.php" method="POST">
                     <input type="text" name="name" placeholder="Ваше имя" required>
                     <input type="tel" name="phone" placeholder="Телефон" required>
                     <input type="email" name="email" placeholder="Email">

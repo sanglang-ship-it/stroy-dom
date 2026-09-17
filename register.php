@@ -103,7 +103,20 @@
         <div class="register-box">
             <h1>📝 Регистрация</h1>
             <p class="subtitle">Создайте новый аккаунт</p>
-            <form action="#" method="POST">
+        <?php if (isset($_GET['error'])): ?>
+    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+        <?php
+        $errors = [
+            'empty'     => 'Заполните все обязательные поля',
+            'passwords' => 'Пароли не совпадают',
+            'exists'    => 'Этот email уже зарегистрирован',
+            'db'        => 'Ошибка базы данных. Попробуйте позже'
+        ];
+        echo $errors[$_GET['error']] ?? 'Ошибка регистрации';
+        ?>
+    </div>
+<?php endif; ?>
+            <form action="register_handler.php" method="POST">
                 <label for="name">ФИО</label>
                 <input type="text" id="name" name="name" placeholder="Введите ваше ФИО" required>
 

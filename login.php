@@ -103,7 +103,7 @@
         <div class="login-box">
             <h1>🔐 Вход</h1>
             <p class="subtitle">Войдите в свой аккаунт</p>
-            <form action="#" method="POST">
+            <form action="auth.php" method="POST">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="Введите email" required>
 
