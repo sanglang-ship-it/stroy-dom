@@ -48,6 +48,7 @@ $result = $conn->query($sql);
             <a href="clients.php" class="active">Клиенты</a>
             <a href="services.php">Услуги</a>
             <a href="portfolio.php">Портфолио</a>
+            <a href="articles.php">Статьи</a>
             <a href="../index.php">На сайт</a>
         </nav>
     </div>

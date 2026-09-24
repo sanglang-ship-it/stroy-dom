@@ -1,7 +1,10 @@
 <?php
 session_start();
+if (!isset($_SESSION['client_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: index.php');
+    exit;
+}
 require_once '../config.php';
-
 $sql = "SELECT s.*, c.cat_name 
         FROM services s
         LEFT JOIN service_categories c ON s.cat_id = c.cat_id
@@ -42,13 +45,16 @@ $result = $conn->query($sql);
     <div class="container">
         <div class="logo">Строй<span>Дом</span> | Админ-панель</div>
         <nav>
-            <a href="index.php">Дашборд</a>
-            <a href="applications.php">Заявки</a>
-            <a href="clients.php">Клиенты</a>
-            <a href="services.php" class="active">Услуги</a>
-            <a href="portfolio.php">Портфолио</a>
-            <a href="../index.php">На сайт</a>
-        </nav>
+    <a href="index.php">Дашборд</a>
+    <a href="applications.php">Заявки</a>
+    <a href="clients.php">Клиенты</a>
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <a href="services.php" class="active">Услуги</a>
+        <a href="portfolio.php">Портфолио</a>
+    <?php endif; ?>
+    <a href="articles.php">Статьи</a>
+    <a href="../index.php">На сайт</a>
+</nav>
     </div>
 </header>
 
