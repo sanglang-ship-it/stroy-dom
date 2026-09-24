@@ -1,3 +1,12 @@
+<?php
+require_once 'config.php';
+$reviews = $conn->query("SELECT r.*, c.full_name AS client_name 
+                         FROM reviews r 
+                         LEFT JOIN clients c ON r.client_id = c.client_id 
+                         WHERE r.is_published = 1 
+                         ORDER BY r.date_created DESC 
+                         LIMIT 5");
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,21 +15,18 @@
     <title>СтройДом - Строительство частных домов под ключ</title>
     <meta name="description" content="Строительство частных домов под ключ. Проектирование, строительство, отделка. Гарантия качества. Более 200 реализованных объектов.">
     <style>
-        /* ===== ОБЩИЕ СТИЛИ ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', Arial, sans-serif; color: #333; background: #F8F9FA; line-height: 1.6; }
         a { text-decoration: none; color: #2C3E50; }
         a:hover { color: #E67E22; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== КНОПКИ ===== */
         .btn { display: inline-block; padding: 12px 30px; border-radius: 5px; font-weight: 600; transition: all 0.3s; cursor: pointer; border: none; }
         .btn-primary { background: #E67E22; color: #fff; }
         .btn-primary:hover { background: #D35400; color: #fff; }
         .btn-secondary { background: #2C3E50; color: #fff; }
         .btn-secondary:hover { background: #1a252f; color: #fff; }
 
-        /* ===== ШАПКА ===== */
         header { background: #2C3E50; padding: 15px 0; border-bottom: 3px solid #E67E22; }
         header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .logo { font-size: 28px; font-weight: 700; color: #fff; }
@@ -31,13 +37,11 @@
         .theme-toggle:hover { background: #D35400; }
         .header-contacts { color: #fff; font-size: 14px; }
 
-        /* ===== БАННЕР ===== */
         .banner { background: linear-gradient(135deg, #2C3E50 0%, #1a252f 100%); color: #fff; text-align: center; padding: 80px 20px; }
         .banner h1 { font-size: 48px; margin-bottom: 20px; }
         .banner p { font-size: 22px; margin-bottom: 30px; opacity: 0.9; }
         .banner .btn { margin: 0 10px; }
 
-        /* ===== ПРЕИМУЩЕСТВА ===== */
         .advantages { padding: 50px 0; }
         .advantages h2 { text-align: center; font-size: 36px; margin-bottom: 40px; color: #2C3E50; }
         .advantages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
@@ -46,7 +50,6 @@
         .advantage-item h3 { font-size: 20px; color: #2C3E50; }
         .advantage-item p { color: #666; font-size: 15px; }
 
-        /* ===== ССЫЛКИ НА РАЗДЕЛЫ ===== */
         .section-links { padding: 40px 0; }
         .section-links h2 { text-align: center; font-size: 36px; color: #2C3E50; margin-bottom: 40px; }
         .section-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; }
@@ -57,7 +60,6 @@
         .section-link-card p { color: #666; margin-bottom: 15px; }
         .section-link-card .btn { font-size: 14px; padding: 8px 20px; }
 
-        /* ===== ФУТЕР ===== */
         footer { background: #2C3E50; color: #fff; padding: 40px 0 20px; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 30px; }
         .footer-grid h4 { color: #E67E22; margin-bottom: 15px; }
@@ -65,7 +67,6 @@
         .footer-grid a:hover { color: #E67E22; }
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 14px; color: #888; }
 
-        /* ===== ТЕМНАЯ ТЕМА ===== */
         body.dark-theme { background: #000 !important; color: #fff !important; font-size: 20px !important; }
         body.dark-theme header { background: #000 !important; border-bottom: 2px solid #fff !important; }
         body.dark-theme .logo { color: #fff !important; }
@@ -75,9 +76,8 @@
         body.dark-theme .banner { background: #111 !important; }
         body.dark-theme .banner h1 { color: #fff !important; }
         body.dark-theme .banner p { color: #fff !important; }
-        body.dark-theme .btn-primary { background: #FFFF00 !important; color: #000 !important; font-size: 20px !important; padding: 15px 35px !important; }
-        body.dark-theme .btn-primary:hover { background: #FFDD00 !important; }
-        body.dark-theme .btn-secondary { background: #fff !important; color: #000 !important; font-size: 20px !important; padding: 15px 35px !important; }
+        body.dark-theme .btn-primary { background: #FFFF00 !important; color: #000 !important; }
+        body.dark-theme .btn-secondary { background: #fff !important; color: #000 !important; }
         body.dark-theme .advantages h2 { color: #fff !important; }
         body.dark-theme .advantage-item { background: #222 !important; border: 2px solid #fff !important; }
         body.dark-theme .advantage-item h3 { color: #fff !important; }
@@ -86,14 +86,11 @@
         body.dark-theme .section-link-card { background: #222 !important; border: 2px solid #fff !important; }
         body.dark-theme .section-link-card h3 { color: #fff !important; }
         body.dark-theme .section-link-card p { color: #ccc !important; }
-        body.dark-theme .section-link-card .btn { background: #FFFF00 !important; color: #000 !important; font-size: 18px !important; padding: 10px 25px !important; }
         body.dark-theme footer { background: #111 !important; border-top: 2px solid #444 !important; }
         body.dark-theme .footer-grid h4 { color: #FFFF00 !important; }
         body.dark-theme .footer-grid p, body.dark-theme .footer-grid a { color: #ccc !important; }
-        body.dark-theme .footer-grid a:hover { color: #FFFF00 !important; }
-        body.dark-theme .theme-toggle { background: #FFFF00 !important; color: #000 !important; font-size: 18px !important; padding: 10px 20px !important; }
+        body.dark-theme .theme-toggle { background: #FFFF00 !important; color: #000 !important; }
 
-        /* ===== АДАПТИВ ===== */
         @media (max-width: 768px) {
             header .container { flex-direction: column; text-align: center; }
             nav a { display: inline-block; margin: 5px 10px; }
@@ -122,7 +119,11 @@
             <a href="blog.php">Блог</a>
             <a href="contacts.php">Контакты</a>
             <a href="sitemap.php">Карта сайта</a>
-        <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+            <form action="search.php" method="GET" style="display:inline-block;">
+    <input type="text" name="q" placeholder="Поиск..." 
+           style="padding: 5px 10px; border-radius: 5px; border: none; font-size: 14px; width: 150px;">
+</form>
+            <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
         </nav>
         <button class="theme-toggle" onclick="toggleTheme()">👁️ Версия для слабовидящих</button>
         <div class="header-contacts">📞 +7 (999) 123-45-67</div>
@@ -200,6 +201,7 @@
         </div>
     </div>
 </section>
+
 <!-- ===== КАЛЬКУЛЯТОР СТОИМОСТИ ===== -->
 <section id="calculator" style="padding: 50px 0; background: #fff;">
     <div class="container">
@@ -237,6 +239,37 @@
         </div>
     </div>
 </section>
+
+<!-- ===== ОТЗЫВЫ КЛИЕНТОВ ===== -->
+<section class="reviews" style="padding: 60px 0; background: #F8F9FA;">
+    <div class="container">
+        <h2 style="text-align: center; font-size: 36px; margin-bottom: 40px; color: #2C3E50;">
+            Отзывы клиентов
+        </h2>
+
+        <?php if ($reviews && $reviews->num_rows > 0): ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto;">
+                <?php while ($rev = $reviews->fetch_assoc()): ?>
+                    <div style="background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <p style="color: #E67E22; font-size: 20px; margin-bottom: 10px;">
+                            <?php echo str_repeat('★', (int)$rev['rating']); ?>
+                        </p>
+                        <p style="color: #555; margin-bottom: 15px; font-style: italic;">
+                            «<?php echo htmlspecialchars($rev['comment']); ?>»
+                        </p>
+                        <p style="color: #2C3E50; font-weight: 600;">
+                            — <?php echo htmlspecialchars($rev['client_name'] ?? 'Клиент'); ?>
+                        </p>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else: ?>
+            <p style="text-align: center; color: #888;">Отзывов пока нет</p>
+        <?php endif; ?>
+
+    </div>
+</section>
+
 <!-- ===== ФУТЕР ===== -->
 <footer>
     <div class="container">
@@ -270,7 +303,6 @@
     </div>
 </footer>
 
-<!-- ===== СКРИПТ ПЕРЕКЛЮЧЕНИЯ ТЕМЫ ===== -->
 <script>
 function toggleTheme() {
     const body = document.body;
@@ -286,7 +318,6 @@ function toggleTheme() {
     }
 }
 
-// Восстановление темы при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
