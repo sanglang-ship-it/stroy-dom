@@ -1,3 +1,23 @@
+<?php
+session_start();
+if (!isset($_SESSION['client_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
+require_once '../config.php';
+
+$client_id = (int)$_SESSION['client_id'];
+$stmt = $conn->prepare("SELECT * FROM clients WHERE client_id = ? LIMIT 1");
+$stmt->bind_param("i", $client_id);
+$stmt->execute();
+$client = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$client) {
+    header('Location: ../login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -51,7 +71,7 @@
             <a href="settings.php" class="active">Настройки</a>
             <a href="../index.php">На сайт</a>
         </nav>
-        <div class="user">👤 Алексей Иванов</div>
+      <div class="user">👤 <?php echo htmlspecialchars($client['full_name']); ?></div>
     </div>
 </header>
 
@@ -63,24 +83,21 @@
     <div class="container">
         <div class="settings-box">
             <h2>⚙️ Настройки профиля</h2>
-            <form action="#" method="POST">
-                <label for="name">ФИО</label>
-                <input type="text" id="name" name="name" value="Алексей Иванов" required>
+           <form action="update_settings.php" method="POST">
+    <label for="name">ФИО</label>
+    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($client['full_name']); ?>" required>
 
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="alexey@mail.ru" required>
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($client['email']); ?>" required>
 
-                <label for="phone">Телефон</label>
-                <input type="tel" id="phone" name="phone" value="+7 (903) 123-45-67">
+    <label for="phone">Телефон</label>
+    <input type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($client['phone'] ?? ''); ?>">
 
-                <label for="password">Новый пароль</label>
-                <input type="password" id="password" name="password" placeholder="Оставьте пустым, если не хотите менять">
+    <label for="password">Новый пароль</label>
+    <input type="password" id="password" name="password" placeholder="Оставьте пустым, если не хотите менять">
 
-                <label for="confirm">Подтверждение пароля</label>
-                <input type="password" id="confirm" name="confirm" placeholder="Повторите пароль">
-
-                <button type="submit" class="btn">💾 Сохранить настройки</button>
-            </form>
+    <button type="submit" class="btn">💾 Сохранить настройки</button>
+</form>
             <button class="btn btn-outline" style="width:100%; padding:14px; border-radius:5px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px;">🗑️ Удалить аккаунт</button>
         </div>
     </div>
