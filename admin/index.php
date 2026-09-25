@@ -59,8 +59,8 @@ $positions = null;
 if ($is_admin) {
     $managers_stats = $conn->query("
         SELECT 
-            e.emp_id,
-            e.full_name AS manager_name,
+            c.client_id AS emp_id,
+            c.full_name AS manager_name,
             COUNT(a.app_id) AS total_apps,
             SUM(CASE WHEN s.status_name = 'Договор заключен' THEN 1 ELSE 0 END) AS successful_apps,
             ROUND(
@@ -68,10 +68,11 @@ if ($is_admin) {
                 / NULLIF(COUNT(a.app_id), 0), 
                 1
             ) AS effectiveness
-        FROM employees e
-        LEFT JOIN applications a ON e.emp_id = a.manager_id
+        FROM clients c
+        LEFT JOIN applications a ON c.client_id = a.manager_id
         LEFT JOIN application_statuses s ON a.status_id = s.status_id
-        GROUP BY e.emp_id, e.full_name
+        WHERE c.role = 'manager'
+        GROUP BY c.client_id, c.full_name
         HAVING COUNT(a.app_id) > 0
         ORDER BY effectiveness DESC
     ");
