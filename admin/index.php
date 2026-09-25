@@ -48,8 +48,9 @@ $avg_budget = $avg_budget ? round($avg_budget, 0) : 0;
 
 // Среднее время
 $avg_time = $conn->query("SELECT AVG(TIMESTAMPDIFF(HOUR, date_created, date_updated)) AS avg_t 
-                          FROM applications WHERE date_updated IS NOT NULL")->fetch_assoc()['avg_t'];
-$avg_time = $avg_time ? round($avg_time, 1) : 0;
+                          FROM applications 
+                          WHERE date_updated IS NOT NULL
+                          AND date_created >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetch_assoc()['avg_t'];
 
 // Эффективность менеджеров (только для админа)
 $managers_stats = null;
@@ -176,7 +177,7 @@ if ($is_admin) {
                 <div class="label">Средний бюджет</div>
             </div>
             <div class="stat-card">
-                <div class="number"><?php echo $avg_time; ?> ч</div>
+                <div class="number"><?php echo round($avg_time); ?> ч</div>
                 <div class="label">Среднее время</div>
             </div>
         </div>
