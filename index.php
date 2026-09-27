@@ -251,6 +251,10 @@ $reviews = $conn->query("SELECT r.*, c.full_name AS client_name
             </button>
 
             <div id="result" style="margin-top: 20px;"></div>
+            <p style="text-align: center; color: #888; font-size: 13px; margin-top: 15px;">
+    * Расчёт производится по тарифной ставке за чистый объём строительно-монтажных работ (прямые затраты на оплату труда). 
+    Стоимость материалов, логистики, аренды спецтехники и накладные расходы в расчёт не включены
+</p>
         </div>
     </div>
 </section>

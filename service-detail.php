@@ -102,6 +102,7 @@ if (!$service) {
         <div class="price-block">
             <p class="price"><?php echo number_format($service['cost'], 0, ',', ' '); ?> руб.</p>
             <p class="unit">за 1 <?php echo htmlspecialchars($service['unit'] ?? 'ед.'); ?></p>
+            <p style="color: #888; font-size: 13px;">* Тарифная ставка за чистый объём работ</p>
         </div>
 
         <div class="description">

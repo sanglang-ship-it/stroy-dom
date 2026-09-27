@@ -115,6 +115,9 @@ $result = $conn->query($sql);
 <section class="services-section">
     <div class="container">
         <h1>Наши услуги</h1>
+        <p style="text-align: center; color: #888; font-size: 13px; margin-bottom: 30px;">
+    * Указаны стартовые тарифы за чистый объём работ без стоимости материалов и накладных расходов компании
+</p>
         <div class="service-cards">
             <?php
             // Проверяем, есть ли услуги в базе
