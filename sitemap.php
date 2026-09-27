@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -79,6 +80,15 @@
             <a href="blog.php">Блог</a>
             <a href="contacts.php">Контакты</a>
             <a href="sitemap.php">Карта сайта</a>
+            <?php if (isset($_SESSION['client_id'])): ?>
+    <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager'): ?>
+        <a href="admin/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Админ-панель</a>
+    <?php else: ?>
+        <a href="profile/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Личный кабинет</a>
+    <?php endif; ?>
+<?php else: ?>
+    <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+<?php endif; ?>
         </nav>
         <button class="theme-toggle" onclick="toggleTheme()">👁️ Версия для слабовидящих</button>
         <div class="header-contacts">📞 +7 (999) 123-45-67</div>

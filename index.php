@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config.php';
 $reviews = $conn->query("SELECT r.*, c.full_name AS client_name 
                          FROM reviews r 
@@ -37,7 +38,13 @@ $reviews = $conn->query("SELECT r.*, c.full_name AS client_name
         .theme-toggle:hover { background: #D35400; }
         .header-contacts { color: #fff; font-size: 14px; }
 
-        .banner { background: linear-gradient(135deg, #2C3E50 0%, #1a252f 100%); color: #fff; text-align: center; padding: 80px 20px; }
+        .banner {
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.75), rgba(26, 37, 47, 0.75)),
+                url('img/banner.webp') center/cover no-repeat;
+    color: #fff;
+    text-align: center;
+    padding: 100px 20px;
+}
         .banner h1 { font-size: 48px; margin-bottom: 20px; }
         .banner p { font-size: 22px; margin-bottom: 30px; opacity: 0.9; }
         .banner .btn { margin: 0 10px; }
@@ -123,7 +130,15 @@ $reviews = $conn->query("SELECT r.*, c.full_name AS client_name
     <input type="text" name="q" placeholder="Поиск..." 
            style="padding: 5px 10px; border-radius: 5px; border: none; font-size: 14px; width: 150px;">
 </form>
-            <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+            <?php if (isset($_SESSION['client_id'])): ?>
+    <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager'): ?>
+        <a href="admin/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Админ-панель</a>
+    <?php else: ?>
+        <a href="profile/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Личный кабинет</a>
+    <?php endif; ?>
+<?php else: ?>
+    <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+<?php endif; ?>
         </nav>
         <button class="theme-toggle" onclick="toggleTheme()">👁️ Версия для слабовидящих</button>
         <div class="header-contacts">📞 +7 (999) 123-45-67</div>

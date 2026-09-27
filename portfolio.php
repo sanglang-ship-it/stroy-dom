@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config.php';
 
 $sql = "SELECT p.*, 
@@ -34,12 +35,41 @@ $result = $conn->query($sql);
         .breadcrumbs span { color: #999; }
         .portfolio-section { padding: 60px 0; }
         .portfolio-section h1 { font-size: 36px; color: #2C3E50; margin-bottom: 40px; text-align: center; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .gallery-item { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .gallery-item img { width: 100%; height: 250px; object-fit: cover; display: block; background: #eee; }
-        .gallery-item .info { padding: 20px; }
-        .gallery-item .info h3 { color: #2C3E50; margin-bottom: 8px; }
-        .gallery-item .info p { color: #666; font-size: 14px; margin-bottom: 5px; }
+        .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.gallery-item {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex: 0 1 320px;     
+    max-width: 350px;
+    text-align: center;
+    transition: box-shadow 0.3s;
+}
+
+.gallery-item:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    background: #eee;
+}
+
+.gallery-item .info { padding: 20px; }
+.gallery-item .info h3 { color: #2C3E50; margin-bottom: 8px; }
+.gallery-item .info p  { color: #666; font-size: 14px; margin-bottom: 5px; }
         footer { background: #2C3E50; color: #fff; padding: 40px 0 20px; margin-top: 40px; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 30px; }
         .footer-grid h4 { color: #E67E22; margin-bottom: 15px; }
@@ -60,7 +90,15 @@ $result = $conn->query($sql);
             <a href="blog.php">Блог</a>
             <a href="contacts.php">Контакты</a>
             <a href="sitemap.php">Карта сайта</a>
-            <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+            <?php if (isset($_SESSION['client_id'])): ?>
+    <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager'): ?>
+        <a href="admin/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Админ-панель</a>
+    <?php else: ?>
+        <a href="profile/index.php" style="background: #2C3E50; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Личный кабинет</a>
+    <?php endif; ?>
+<?php else: ?>
+    <a href="login.php" style="background: #E67E22; padding: 6px 15px; border-radius: 5px; color: #fff;">👤 Войти</a>
+<?php endif; ?>
         </nav>
         <div class="header-contacts">📞 +7 (999) 123-45-67</div>
     </div>
