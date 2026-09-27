@@ -83,7 +83,10 @@ $managers = $conn->query("SELECT client_id AS emp_id, full_name FROM clients
             <a href="clients.php">Клиенты</a>
             <a href="services.php">Услуги</a>
             <a href="portfolio.php">Портфолио</a>
+            <a href="articles.php">Статьи</a>
+            <a href="reviews.php">Отзывы</a>
             <a href="../index.php">На сайт</a>
+            <a href="../logout.php" style="background: #e74c3c; padding: 6px 15px; border-radius: 5px; color: #fff;">🚪 Выйти</a>
         </nav>
     </div>
 </header>

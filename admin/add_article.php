@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="index.php">Дашборд</a>
             <a href="applications.php">Заявки</a>
             <a href="articles.php">Статьи</a>
+            <a href="reviews.php">Отзывы</a>
             <a href="../index.php">На сайт</a>
         </nav>
     </div>
