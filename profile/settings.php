@@ -68,8 +68,10 @@ if (!$client) {
             <a href="index.php">Профиль</a>
             <a href="applications.php">Мои заявки</a>
             <a href="history.php">История</a>
+            <a href="add_review.php">Оставить отзыв</a>
             <a href="settings.php" class="active">Настройки</a>
             <a href="../index.php">На сайт</a>
+            <a href="../logout.php" style="background: #e74c3c; padding: 6px 15px; border-radius: 5px; color: #fff;">🚪 Выйти</a>
         </nav>
       <div class="user">👤 <?php echo htmlspecialchars($client['full_name']); ?></div>
     </div>
