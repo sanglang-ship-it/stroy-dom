@@ -122,7 +122,11 @@ $result = $conn->query($sql);
                              alt="<?php echo htmlspecialchars($row['title']); ?>"
                              onerror="this.style.display='none'">
                         <div class="info">
-                            <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+                            <h3>
+    <a href="portfolio-detail.php?id=<?php echo $row['project_id']; ?>">
+        <?php echo htmlspecialchars($row['title']); ?>
+    </a>
+</h3>
                             <p><?php echo htmlspecialchars($row['description'] ?? ''); ?></p>
                             <p><b>Материал:</b> <?php echo htmlspecialchars($row['material_type'] ?? '—'); ?></p>
                             <p><b>Площадь:</b> <?php echo $row['area'] ? $row['area'] . ' м²' : '—'; ?></p>

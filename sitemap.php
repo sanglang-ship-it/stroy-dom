@@ -127,15 +127,16 @@
                 </ul>
             </div>
             <div class="sitemap-col">
-                <h3>Портфолио</h3>
-                <ul>
-                    <li><a href="portfolio.php">Все проекты</a></li>
-                    <li><a href="portfolio-detail.php?id=1">Кирпичный дом в Крылатском</a></li>
-                    <li><a href="portfolio-detail.php?id=2">Дом из бруса в Одинцово</a></li>
-                    <li><a href="portfolio-detail.php?id=3">Газобетонный дом в Мытищах</a></li>
-                    <li><a href="portfolio-detail.php?id=4">Особняк в Рублево</a></li>
-                </ul>
-            </div>
+    <h3>Портфолио</h3>
+    <ul>
+        <li><a href="portfolio.php">Все проекты</a></li>
+        <li><a href="portfolio-detail.php?id=1">Дом в Крылатском</a></li>
+        <li><a href="portfolio-detail.php?id=2">Коттедж в Мытищах</a></li>
+        <li><a href="portfolio-detail.php?id=3">Дом из газобетона в Красногорске</a></li>
+        <li><a href="portfolio-detail.php?id=4">Кирпичный коттедж в Подольске</a></li>
+        <li><a href="portfolio-detail.php?id=5">Каркасный дом в Дмитрове</a></li>
+    </ul>
+</div>
             <div class="sitemap-col">
                 <h3>Блог</h3>
                 <ul>
