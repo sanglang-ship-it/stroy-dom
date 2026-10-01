@@ -5,6 +5,7 @@ if (!isset($_SESSION['client_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 require_once '../config.php';
+
 $sql = "SELECT s.*, c.cat_name 
         FROM services s
         LEFT JOIN service_categories c ON s.cat_id = c.cat_id
@@ -24,7 +25,7 @@ $result = $conn->query($sql);
         .admin-header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .admin-header .logo { font-size: 24px; font-weight: bold; color: #fff; }
         .admin-header .logo span { color: #E67E22; }
-        .admin-header nav a { color: #fff; margin: 0 15px; text-decoration: none; font-size: 14px; }
+        .admin-header nav a { color: #fff; margin: 0 12px; text-decoration: none; font-size: 14px; }
         .admin-header nav a:hover { color: #E67E22; }
         .admin-header nav a.active { color: #E67E22; border-bottom: 2px solid #E67E22; padding-bottom: 5px; }
         .breadcrumbs { background: #fff; padding: 12px 0; margin-bottom: 30px; border-bottom: 1px solid #ddd; font-size: 14px; }
@@ -36,6 +37,13 @@ $result = $conn->query($sql);
         table tr:hover { background: #fafafa; }
         .status-active { background: #2ecc71; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 12px; }
         .status-inactive { background: #e74c3c; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 12px; }
+        .btn-add { background: #27ae60; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .btn-add:hover { background: #219a52; }
+        .btn-edit { background: #E67E22; color: #fff; padding: 4px 10px; border-radius: 4px; text-decoration: none; }
+        .btn-edit:hover { background: #D35400; }
+        .btn-del { background: #e74c3c; color: #fff; padding: 4px 10px; border-radius: 4px; text-decoration: none; }
+        .btn-del:hover { background: #c0392b; }
+        .msg-success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         footer { background: #2C3E50; color: #fff; text-align: center; padding: 20px 0; margin-top: 40px; font-size: 14px; }
     </style>
 </head>
@@ -45,18 +53,18 @@ $result = $conn->query($sql);
     <div class="container">
         <div class="logo">Строй<span>Дом</span> | Админ-панель</div>
         <nav>
-    <a href="index.php">Дашборд</a>
-    <a href="applications.php">Заявки</a>
-    <a href="clients.php">Клиенты</a>
-    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-        <a href="services.php" class="active">Услуги</a>
-        <a href="portfolio.php">Портфолио</a>
-    <?php endif; ?>
-    <a href="articles.php">Статьи</a>
-    <a href="reviews.php">Отзывы</a>
-    <a href="../index.php">На сайт</a>
-    <a href="../logout.php" style="background: #e74c3c; padding: 6px 15px; border-radius: 5px; color: #fff;">🚪 Выйти</a>
-</nav>
+            <a href="index.php">Дашборд</a>
+            <a href="applications.php">Заявки</a>
+            <a href="clients.php">Клиенты</a>
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <a href="services.php" class="active">Услуги</a>
+                <a href="portfolio.php">Портфолио</a>
+            <?php endif; ?>
+            <a href="articles.php">Статьи</a>
+            <a href="reviews.php">Отзывы</a>
+            <a href="../index.php">На сайт</a>
+            <a href="../logout.php" style="background: #e74c3c; padding: 6px 15px; border-radius: 5px; color: #fff;">🚪 Выйти</a>
+        </nav>
     </div>
 </header>
 
@@ -66,7 +74,22 @@ $result = $conn->query($sql);
 
 <section style="padding: 20px 0 40px;">
     <div class="container">
-        <h1 style="margin-bottom: 20px;">🔧 Управление услугами</h1>
+
+        <?php if (isset($_GET['added'])): ?>
+            <div class="msg-success">✅ Услуга добавлена</div>
+        <?php endif; ?>
+        <?php if (isset($_GET['updated'])): ?>
+            <div class="msg-success">✅ Услуга обновлена</div>
+        <?php endif; ?>
+        <?php if (isset($_GET['deleted'])): ?>
+            <div class="msg-success">✅ Услуга удалена</div>
+        <?php endif; ?>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">🔧 Управление услугами</h1>
+            <a href="add_service.php" class="btn-add">➕ Добавить услугу</a>
+        </div>
+
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -77,6 +100,7 @@ $result = $conn->query($sql);
                         <th>Стоимость</th>
                         <th>Ед. изм.</th>
                         <th>Статус</th>
+                        <th>Действие</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,13 +119,15 @@ $result = $conn->query($sql);
                                         <span class="status-inactive">Неактивна</span>
                                     <?php endif; ?>
                                 </td>
+                                <td>
+                                    <a href="edit_service.php?id=<?php echo $row['service_id']; ?>" class="btn-edit">✏️</a>
+                                    <a href="delete_service.php?id=<?php echo $row['service_id']; ?>" class="btn-del" onclick="return confirm('Удалить услугу?')">🗑️</a>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: #888;">
-                                Услуг пока нет
-                            </td>
+                            <td colspan="7" style="text-align: center; padding: 30px; color: #888;">Услуг пока нет</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
