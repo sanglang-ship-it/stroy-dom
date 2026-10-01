@@ -21,13 +21,16 @@ if ($is_manager) {
             FROM applications a
             LEFT JOIN clients c ON a.client_id = c.client_id
             LEFT JOIN application_statuses s ON a.status_id = s.status_id
-            WHERE a.manager_id = ?
+            WHERE a.manager_id = ? 
+               OR a.manager_id IS NULL 
+               OR a.status_id = 1
             ORDER BY a.date_created DESC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $manager_id);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
+    // Админ видит все заявки
     $sql = "SELECT a.*, 
                    c.full_name AS client_name, 
                    c.phone AS client_phone,
