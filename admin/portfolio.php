@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['client_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: index.php');
+    exit;
+}
 require_once '../config.php';
 
 $sql = "SELECT p.*, c.full_name AS client_name 
@@ -21,7 +25,7 @@ $result = $conn->query($sql);
         .admin-header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .admin-header .logo { font-size: 24px; font-weight: bold; color: #fff; }
         .admin-header .logo span { color: #E67E22; }
-        .admin-header nav a { color: #fff; margin: 0 15px; text-decoration: none; font-size: 14px; }
+        .admin-header nav a { color: #fff; margin: 0 12px; text-decoration: none; font-size: 14px; }
         .admin-header nav a:hover { color: #E67E22; }
         .admin-header nav a.active { color: #E67E22; border-bottom: 2px solid #E67E22; padding-bottom: 5px; }
         .breadcrumbs { background: #fff; padding: 12px 0; margin-bottom: 30px; border-bottom: 1px solid #ddd; font-size: 14px; }
@@ -31,6 +35,13 @@ $result = $conn->query($sql);
         table th { background: #f8f9fa; padding: 14px 16px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
         table td { padding: 12px 16px; border-bottom: 1px solid #eee; }
         table tr:hover { background: #fafafa; }
+        .btn-add { background: #27ae60; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .btn-add:hover { background: #219a52; }
+        .btn-edit { background: #E67E22; color: #fff; padding: 4px 10px; border-radius: 4px; text-decoration: none; }
+        .btn-edit:hover { background: #D35400; }
+        .btn-del { background: #e74c3c; color: #fff; padding: 4px 10px; border-radius: 4px; text-decoration: none; }
+        .btn-del:hover { background: #c0392b; }
+        .msg-success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         footer { background: #2C3E50; color: #fff; text-align: center; padding: 20px 0; margin-top: 40px; font-size: 14px; }
     </style>
 </head>
@@ -59,7 +70,22 @@ $result = $conn->query($sql);
 
 <section style="padding: 20px 0 40px;">
     <div class="container">
-        <h1 style="margin-bottom: 20px;">🖼️ Управление портфолио</h1>
+
+        <?php if (isset($_GET['added'])): ?>
+            <div class="msg-success">✅ Проект добавлен</div>
+        <?php endif; ?>
+        <?php if (isset($_GET['updated'])): ?>
+            <div class="msg-success">✅ Проект обновлён</div>
+        <?php endif; ?>
+        <?php if (isset($_GET['deleted'])): ?>
+            <div class="msg-success">✅ Проект удалён</div>
+        <?php endif; ?>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">🖼️ Управление портфолио</h1>
+            <a href="add_project.php" class="btn-add">➕ Добавить проект</a>
+        </div>
+
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -70,6 +96,7 @@ $result = $conn->query($sql);
                         <th>Площадь</th>
                         <th>Год</th>
                         <th>Клиент</th>
+                        <th>Действие</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -82,13 +109,15 @@ $result = $conn->query($sql);
                                 <td><?php echo $row['area'] ? $row['area'] . ' м²' : '—'; ?></td>
                                 <td><?php echo htmlspecialchars($row['year_built'] ?? '—'); ?></td>
                                 <td><?php echo htmlspecialchars($row['client_name'] ?? '—'); ?></td>
+                                <td>
+                                    <a href="edit_project.php?id=<?php echo $row['project_id']; ?>" class="btn-edit">✏️</a>
+                                    <a href="delete_project.php?id=<?php echo $row['project_id']; ?>" class="btn-del" onclick="return confirm('Удалить проект?')">🗑️</a>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: #888;">
-                                Проектов пока нет
-                            </td>
+                            <td colspan="7" style="text-align: center; padding: 30px; color: #888;">Проектов пока нет</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
