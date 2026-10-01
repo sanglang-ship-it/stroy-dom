@@ -106,12 +106,14 @@ if ($is_manager) {
         <?php endif; ?>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">📋 Управление заявками</h1>
-            <a href="export_applications.php" 
-               style="background: #27ae60; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-                📥 Экспорт в Excel
-            </a>
-        </div>
+    <h1 style="margin: 0;">📋 Управление заявками</h1>
+    <?php if (!$is_manager): ?>
+        <a href="export_applications.php" 
+           style="background: #27ae60; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+            📥 Экспорт в Excel
+        </a>
+    <?php endif; ?>
+</div>
 
         <div class="table-wrapper">
             <table>
