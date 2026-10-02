@@ -22,6 +22,12 @@ if ($is_manager) {
     $done = $conn->query("SELECT COUNT(*) AS c FROM applications a 
                           LEFT JOIN application_statuses s ON a.status_id = s.status_id 
                           WHERE a.manager_id = $manager_id AND s.is_final = 1")->fetch_assoc()['c'];
+    $total_clients = 0;
+    $total_services = 0;
+    $total_projects = 0;
+    $conversion = 0;
+    $avg_budget = 0;
+    $avg_time = 0;
 } else {
     $total_applications = $conn->query("SELECT COUNT(*) AS c FROM applications")->fetch_assoc()['c'];
     $in_work = $conn->query("SELECT COUNT(*) AS c FROM applications a 
@@ -30,29 +36,31 @@ if ($is_manager) {
     $done = $conn->query("SELECT COUNT(*) AS c FROM applications a 
                           LEFT JOIN application_statuses s ON a.status_id = s.status_id 
                           WHERE s.is_final = 1")->fetch_assoc()['c'];
+
+    $total_clients  = $conn->query("SELECT COUNT(*) AS c FROM clients WHERE role = 'client'")->fetch_assoc()['c'];
+    $total_services = $conn->query("SELECT COUNT(*) AS c FROM services WHERE is_active = 1")->fetch_assoc()['c'];
+    $total_projects = $conn->query("SELECT COUNT(*) AS c FROM projects")->fetch_assoc()['c'];
+
+    // Конверсия
+    $conversion = $total_applications > 0 
+        ? round(($done / $total_applications) * 100, 1) 
+        : 0;
+
+    // Средний бюджет
+    $avg_budget = $conn->query("SELECT AVG(budget) AS avg_b FROM applications WHERE budget IS NOT NULL")
+                       ->fetch_assoc()['avg_b'];
+    $avg_budget = $avg_budget ? round($avg_budget, 0) : 0;
+
+    // Среднее время (только заявки, обработанные за последние 30 дней)
+    $avg_time = $conn->query("
+        SELECT AVG(TIMESTAMPDIFF(HOUR, date_created, date_updated)) AS avg_hours
+        FROM applications
+        WHERE date_updated IS NOT NULL
+          AND TIMESTAMPDIFF(DAY, date_created, date_updated) <= 30
+    ")->fetch_assoc()['avg_hours'] ?? 0;
 }
 
-$total_clients  = $conn->query("SELECT COUNT(*) AS c FROM clients WHERE role = 'client'")->fetch_assoc()['c'];
-$total_services = $conn->query("SELECT COUNT(*) AS c FROM services WHERE is_active = 1")->fetch_assoc()['c'];
-$total_projects = $conn->query("SELECT COUNT(*) AS c FROM projects")->fetch_assoc()['c'];
-
-// Конверсия
-$conversion = $total_applications > 0 
-    ? round(($done / $total_applications) * 100, 1) 
-    : 0;
-
-// Средний бюджет
-$avg_budget = $conn->query("SELECT AVG(budget) AS avg_b FROM applications WHERE budget IS NOT NULL")
-                   ->fetch_assoc()['avg_b'];
-$avg_budget = $avg_budget ? round($avg_budget, 0) : 0;
-
-// Среднее время
-$avg_time = $conn->query("SELECT AVG(TIMESTAMPDIFF(HOUR, date_created, date_updated)) AS avg_t 
-                          FROM applications 
-                          WHERE date_updated IS NOT NULL
-                          AND date_created >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetch_assoc()['avg_t'];
-
-// Эффективность менеджеров (только для админа)
+// Эффективность менеджеров (только админ)
 $managers_stats = null;
 $positions = null;
 
@@ -82,6 +90,31 @@ if ($is_admin) {
                                LEFT JOIN employees e ON p.pos_id = e.pos_id 
                                GROUP BY p.pos_id
                                ORDER BY p.pos_id");
+}
+
+// Аналитика заявок (только админ)
+$status_stats = null;
+$total_budget = 0;
+$monthly = null;
+
+if ($is_admin) {
+    $status_stats = $conn->query("
+        SELECT s.status_name, s.color_code, COUNT(a.app_id) AS count
+        FROM application_statuses s
+        LEFT JOIN applications a ON a.status_id = s.status_id
+        GROUP BY s.status_id
+        ORDER BY s.sort_order
+    ");
+
+    $total_budget = $conn->query("SELECT SUM(budget) AS total FROM applications WHERE budget IS NOT NULL")->fetch_assoc()['total'] ?? 0;
+
+    $monthly = $conn->query("
+        SELECT DATE_FORMAT(date_created, '%Y-%m') AS month, COUNT(*) AS count
+        FROM applications
+        GROUP BY DATE_FORMAT(date_created, '%Y-%m')
+        ORDER BY month DESC
+        LIMIT 6
+    ");
 }
 ?>
 <!DOCTYPE html>
@@ -127,11 +160,15 @@ if ($is_admin) {
             <a href="index.php" class="active">Дашборд</a>
             <a href="applications.php">Заявки</a>
             <a href="clients.php">Клиенты</a>
-            <a href="services.php">Услуги</a>
-            <a href="portfolio.php">Портфолио</a>
+            <?php if ($is_admin): ?>
+                <a href="services.php">Услуги</a>
+                <a href="portfolio.php">Портфолио</a>
+            <?php endif; ?>
             <a href="articles.php">Статьи</a>
             <a href="reviews.php">Отзывы</a>
-            <a href="users.php">Пользователи</a>
+            <?php if ($is_admin): ?>
+                <a href="users.php">Пользователи</a>
+            <?php endif; ?>
             <a href="../index.php">На сайт</a>
             <a href="../logout.php" style="background: #e74c3c; padding: 6px 15px; border-radius: 5px; color: #fff;">🚪 Выйти</a>
         </nav>
@@ -159,30 +196,33 @@ if ($is_admin) {
                 <div class="number"><?php echo $done; ?></div>
                 <div class="label">Завершено</div>
             </div>
-            <div class="stat-card">
-                <div class="number"><?php echo $total_clients; ?></div>
-                <div class="label">Клиентов</div>
-            </div>
-            <div class="stat-card">
-                <div class="number"><?php echo $total_services; ?></div>
-                <div class="label">Услуг</div>
-            </div>
-            <div class="stat-card">
-                <div class="number"><?php echo $total_projects; ?></div>
-                <div class="label">Проектов</div>
-            </div>
-            <div class="stat-card">
-                <div class="number"><?php echo $conversion; ?>%</div>
-                <div class="label">Конверсия заявок</div>
-            </div>
-            <div class="stat-card">
-                <div class="number"><?php echo number_format($avg_budget, 0, ',', ' '); ?> ₽</div>
-                <div class="label">Средний бюджет</div>
-            </div>
-            <div class="stat-card">
-                <div class="number"><?php echo round($avg_time); ?> ч</div>
-                <div class="label">Среднее время</div>
-            </div>
+
+            <?php if ($is_admin): ?>
+                <div class="stat-card">
+                    <div class="number"><?php echo $total_clients; ?></div>
+                    <div class="label">Клиентов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><?php echo $total_services; ?></div>
+                    <div class="label">Услуг</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><?php echo $total_projects; ?></div>
+                    <div class="label">Проектов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><?php echo $conversion; ?>%</div>
+                    <div class="label">Конверсия заявок</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><?php echo number_format($avg_budget, 0, ',', ' '); ?> ₽</div>
+                    <div class="label">Средний бюджет</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><?php echo round($avg_time); ?> ч</div>
+                    <div class="label">Среднее время</div>
+                </div>
+            <?php endif; ?>
         </div>
 
         <?php if ($is_admin && $managers_stats && $managers_stats->num_rows > 0): ?>
@@ -211,7 +251,7 @@ if ($is_admin) {
 
         <?php if ($is_admin && $positions): ?>
             <h2 style="margin: 30px 0 15px;">Сотрудники по должностям</h2>
-            <table>
+            <table style="margin-bottom: 30px;">
                 <tr style="background: #f8f9fa;">
                     <th>Должность</th>
                     <th>Количество</th>
@@ -223,6 +263,61 @@ if ($is_admin) {
                     </tr>
                 <?php endwhile; ?>
             </table>
+        <?php endif; ?>
+
+        <?php if ($is_admin): ?>
+            <h2 style="margin: 30px 0 15px;">Аналитика заявок</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+
+                <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 15px;">Заявки по статусам</h3>
+                    <table style="width: 100%; box-shadow: none;">
+                        <?php while ($s = $status_stats->fetch_assoc()): ?>
+                            <tr>
+                                <td style="padding: 5px 0; border-bottom: none;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: <?php echo $s['color_code']; ?>;"></span>
+                                    <?php echo htmlspecialchars($s['status_name']); ?>
+                                </td>
+                                <td style="padding: 5px 0; text-align: right; border-bottom: none;"><b><?php echo $s['count']; ?></b></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </table>
+                </div>
+
+                <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 15px;">Общая сумма бюджетов</h3>
+                    <p style="font-size: 28px; color: #2C3E50; font-weight: bold; text-align: center;">
+                        <?php echo number_format($total_budget, 0, ',', ' '); ?> руб.
+                    </p>
+                    <p style="text-align: center; color: #888; font-size: 14px;">по всем заявкам с указанным бюджетом</p>
+                </div>
+
+                <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 15px;">Среднее время обработки</h3>
+                    <p style="font-size: 28px; color: #2C3E50; font-weight: bold; text-align: center;">
+                        <?php echo round($avg_time); ?> ч.
+                    </p>
+                    <p style="text-align: center; color: #888; font-size: 14px;">от подачи заявки до её обновления</p>
+                </div>
+
+            </div>
+
+            <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px;">Заявки по месяцам</h3>
+                <table style="width: 100%; border-collapse: collapse; box-shadow: none;">
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 8px; text-align: left;">Месяц</th>
+                        <th style="padding: 8px; text-align: right;">Количество заявок</th>
+                    </tr>
+                    <?php while ($m = $monthly->fetch_assoc()): ?>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee;"><?php echo htmlspecialchars($m['month']); ?></td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;"><b><?php echo $m['count']; ?></b></td>
+                        </tr>
+                    <?php endwhile; ?>
+                </table>
+            </div>
         <?php endif; ?>
 
         <h2 style="margin: 30px 0 20px;">Быстрое управление</h2>
@@ -239,18 +334,20 @@ if ($is_admin) {
                 <p>Управление клиентами</p>
                 <a href="clients.php" class="btn">Перейти</a>
             </div>
-            <div class="admin-card">
-                <span class="icon">🔧</span>
-                <h3>Услуги</h3>
-                <p>Каталог услуг</p>
-                <a href="services.php" class="btn">Перейти</a>
-            </div>
-            <div class="admin-card">
-                <span class="icon">🖼️</span>
-                <h3>Портфолио</h3>
-                <p>Управление проектами</p>
-                <a href="portfolio.php" class="btn">Перейти</a>
-            </div>
+            <?php if ($is_admin): ?>
+                <div class="admin-card">
+                    <span class="icon">🔧</span>
+                    <h3>Услуги</h3>
+                    <p>Каталог услуг</p>
+                    <a href="services.php" class="btn">Перейти</a>
+                </div>
+                <div class="admin-card">
+                    <span class="icon">🖼️</span>
+                    <h3>Портфолио</h3>
+                    <p>Управление проектами</p>
+                    <a href="portfolio.php" class="btn">Перейти</a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
